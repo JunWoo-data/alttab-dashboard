@@ -11,4 +11,3 @@ from (
   SELECT * FROM `alttab-348505.alttab_22w.player_name_list` 
   cross join (select * from `alttab-348505.alttab_22w.season_date_list`)
 )
-order by match_date

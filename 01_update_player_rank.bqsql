@@ -33,7 +33,7 @@ _rank_point_delta as (
           when is_third_upset is null and third_gain < third_loss then -5
           when is_third_upset = false and third_gain < third_loss then -10                 --3rd game winning point
           else null end) as rank_point_delta,
-    null as rank_poine,
+    null as rank_point,
     null as rank
   FROM `alt-tab-348721.alttab_22w.match_result` 
   where match_date = today_date

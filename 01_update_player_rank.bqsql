@@ -1,4 +1,4 @@
-DECLARE today_date DATE DEFAULT "2021-01-27";
+DECLARE today_date DATE DEFAULT "2022-01-27";
 
 delete from `alt-tab-348721.alttab_22w.player_rank` where match_date = today_date;
 

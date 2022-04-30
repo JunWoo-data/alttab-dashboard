@@ -1,6 +1,6 @@
 create or replace table `alt-tab-348721.alttab_22w.player_rank`
 partition by match_date 
-as
+as 
 
 select
   player_name, 

@@ -11,28 +11,35 @@ _rank_point_delta as (
   SELECT
     player_name,
     match_date,
-    (first_gain - first_loss) + (second_gain - second_loss) + (third_gain - third_loss) +  --game difference point
+    --game difference point
+    coalesce(first_gain - first_loss, 0) + coalesce(second_gain - second_loss, 0) + coalesce(third_gain - third_loss, 0) +  
+    
+     --1st game winning point
     (case when is_first_upset = true and first_gain > first_loss then 10  
           when is_first_upset is null and first_gain > first_loss then 5
           when is_first_upset = false and first_gain > first_loss then 5
           when is_first_upset = true and first_gain < first_loss then -5
           when is_first_upset is null and first_gain < first_loss then -5
           when is_first_upset = false and first_gain < first_loss then -10
-          else null end) +                                                                 --1st game winning point
+          else 0 end) +      
+    
+    --2nd game winning point                                                                
     (case when is_second_upset = true and second_gain > second_loss then 10  
           when is_second_upset is null and second_gain > second_loss then 5
           when is_second_upset = false and second_gain > second_loss then 5
           when is_second_upset = true and second_gain < second_loss then -5
           when is_second_upset is null and second_gain < second_loss then -5
           when is_second_upset = false and second_gain < second_loss then -10
-          else null end) +                                                                 --2nd game winning point
+          else 0 end) +    
+
+    --3rd game winning point                                                                   
     (case when is_third_upset = true and third_gain > third_loss then 10  
           when is_third_upset is null and third_gain > third_loss then 5
           when is_third_upset = false and third_gain > third_loss then 5
           when is_third_upset = true and third_gain < third_loss then -5
           when is_third_upset is null and third_gain < third_loss then -5
-          when is_third_upset = false and third_gain < third_loss then -10                 --3rd game winning point
-          else null end) as rank_point_delta,
+          when is_third_upset = false and third_gain < third_loss then -10                 
+          else 0 end) as rank_point_delta,
     null as rank_point,
     null as rank
   FROM `alt-tab-348721.alttab_22w.match_result` 

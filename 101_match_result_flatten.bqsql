@@ -1,0 +1,96 @@
+create or replace table `alt-tab-348721.alttab_22w.match_result_flatten`
+partition by match_date
+as 
+
+with
+_official_match_result as (
+  select 
+    * 
+  from `alt-tab-348721.alttab_22w.match_result_original` 
+),
+
+_official_match_result_flatten as (
+  -- for team_a_player_1
+  select 
+    team_a_player_1 as player_name,
+    match_date,
+    match_order,
+    team_a_score as gain,
+    team_b_score as loss,
+    (case
+       when team_a_point < team_b_point then true 
+       when team_a_point > team_b_point then false
+       else null end) as is_upset,
+    (case 
+       when team_a_score > team_b_score then 1
+       when team_a_score < team_b_score then -1
+       else 0 end) as match_result
+  from _official_match_result
+  union all 
+  
+  -- for team_a_player_2
+  select 
+    team_a_player_2 as player_name,
+    match_date,
+    match_order,
+    team_a_score as gain,
+    team_b_score as loss,
+    (case
+       when team_a_point < team_b_point then true 
+       when team_a_point > team_b_point then false
+       else null end) as is_upset,
+    (case 
+       when team_a_score > team_b_score then 1
+       when team_a_score < team_b_score then -1
+       else 0 end) as match_result
+  from _official_match_result
+  union all
+
+  -- for team_b_player_1
+  select 
+    team_b_player_1 as player_name,
+    match_date,
+    match_order,
+    team_b_score as gain,
+    team_a_score as loss,
+    (case
+       when team_b_point < team_a_point then true 
+       when team_b_point > team_a_point then false
+       else null end) as is_upset,
+    (case 
+       when team_b_score > team_a_score then 1
+       when team_b_score < team_a_score then -1
+       else 0 end) as match_result
+  from _official_match_result
+  union all
+
+  -- for team_b_player_2
+  select 
+    team_b_player_2 as player_name,
+    match_date,
+    match_order,
+    team_b_score as gain,
+    team_a_score as loss,
+    (case
+       when team_b_point < team_a_point then true 
+       when team_b_point > team_a_point then false
+       else null end) as is_upset,
+    (case 
+       when team_b_score > team_a_score then 1
+       when team_b_score < team_a_score then -1
+       else 0 end) as match_result
+  from _official_match_result
+)
+
+select 
+  *,
+  gain - loss as game_difference_point,
+  (case when is_upset = true and gain > loss then 10  
+        when is_upset is null and gain > loss then 5
+        when is_upset = false and gain > loss then 5
+        when is_upset = true and gain < loss then -5
+        when is_upset is null and gain < loss then -5
+        when is_upset = false and gain < loss then -10
+        else 0 end) as winning_point   
+from _official_match_result_flatten 
+

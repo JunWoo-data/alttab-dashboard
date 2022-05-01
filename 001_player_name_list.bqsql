@@ -1,0 +1,27 @@
+create or replace table `alt-tab-348721.alttab_22w.player_name_list` as
+
+select "곽대희" as player_name
+union all
+select "안치훈"
+union all
+select "이영준"
+union all
+select "우영준"
+union all
+select "이인호"
+union all
+select "양성진"
+union all
+select "최종욱"
+union all
+select "정성운"
+union all
+select "정선민"
+union all
+select "오상택"
+union all
+select "성석현"
+union all
+select "이성욱"
+
+

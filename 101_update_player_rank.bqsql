@@ -1,0 +1,39 @@
+DECLARE today_date DATE DEFAULT "2022-01-06";
+
+delete from `alt-tab-348721.alttab_22w.player_rank` where match_date = today_date;
+
+INSERT into `alt-tab-348721.alttab_22w.player_rank`
+
+with
+_rank_point_delta as (
+  select * from `alt-tab-348721.alttab_22w.player_rank` where match_date < today_date
+  union all
+  SELECT 
+    player_name, match_date,
+    sum(game_difference_point) + sum(winning_point) as rank_point_delta,
+    null as rank_point,
+    null as rank
+  FROM `alt-tab-348721.alttab_22w.match_result_flatten` 
+  WHERE match_date = today_date
+  group by player_name, match_date 
+),
+
+_today_rank_table as (
+  select
+    player_name,
+    match_date,
+    rank_point_delta,
+    rank_point,
+    rank() over(order by rank_point DESC) as rank
+  from (
+    select
+      player_name, 
+      match_date, 
+      rank_point_delta,
+      sum(rank_point_delta) over(partition by player_name order by match_date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as rank_point
+    from _rank_point_delta
+  )
+  where match_date = today_date
+)
+
+select * from _today_rank_table

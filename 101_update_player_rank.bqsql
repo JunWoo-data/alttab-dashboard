@@ -1,39 +1,95 @@
-DECLARE today_date DATE DEFAULT "2022-01-06";
+declare last_date date;
+declare today_date date;
+declare i int64 default 1;
+declare n int64;
 
-delete from `alt-tab-348721.alttab_22w.player_rank` where match_date = today_date;
+set last_date = (select max(match_date) from `alt-tab-348721.alttab_22w.player_rank`);
 
-INSERT into `alt-tab-348721.alttab_22w.player_rank`
-
-with
-_rank_point_delta as (
-  select * from `alt-tab-348721.alttab_22w.player_rank` where match_date < today_date
-  union all
-  SELECT 
-    player_name, match_date,
-    sum(game_difference_point) + sum(winning_point) as rank_point_delta,
-    null as rank_point,
-    null as rank
-  FROM `alt-tab-348721.alttab_22w.match_result_flatten` 
-  WHERE match_date = today_date
-  group by player_name, match_date 
-),
-
-_today_rank_table as (
+create temp table _match_date_list as (
   select
-    player_name,
     match_date,
-    rank_point_delta,
-    rank_point,
-    rank() over(order by rank_point DESC) as rank
+    rank() over(order by match_date) as match_date_order 
   from (
-    select
-      player_name, 
-      match_date, 
-      rank_point_delta,
-      sum(rank_point_delta) over(partition by player_name order by match_date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as rank_point
-    from _rank_point_delta
+    SELECT distinct
+      match_date
+    FROM `alt-tab-348721.alttab_22w.match_result_flatten`
+    where match_date > last_date
   )
-  where match_date = today_date
-)
+);
 
-select * from _today_rank_table
+set n = (
+  select
+    max(match_date_order) as n 
+  from _match_date_list
+);
+
+while i <= n do
+  set today_date = (select match_date from _match_date_list where match_date_order = i);
+  
+  delete from `alt-tab-348721.alttab_22w.player_rank` where match_date = today_date;
+  INSERT into `alt-tab-348721.alttab_22w.player_rank`
+
+  with
+  _today_result_flatten as (
+  select
+    _name.player_name as player_name,
+    coalesce(_result.match_date, today_date) as match_date,
+    coalesce(game_difference_point, 0) as game_difference_point,
+    coalesce(winning_point, 0) as winning_point,
+  from `alt-tab-348721.alttab_22w.player_name_list` as _name
+  left outer join ( 
+    select
+      *
+    from `alt-tab-348721.alttab_22w.match_result_flatten` 
+    where match_date = today_date
+    ) as _result
+  using (player_name)
+  ),
+
+  _rank_point_delta as (
+    select * from `alt-tab-348721.alttab_22w.player_rank` where match_date < today_date
+    union all
+    SELECT 
+      player_name, match_date,
+      sum(game_difference_point) + sum(winning_point) as rank_point_delta,
+      null as rank_point,
+      null as rank
+    FROM _today_result_flatten
+    group by player_name, match_date 
+  ),
+
+  _today_rank_table as (
+    select
+      player_name,
+      match_date,
+      rank_point_delta,
+      rank_point,
+      rank() over(order by rank_point DESC) as rank
+    from (
+      select
+        player_name, 
+        match_date, 
+        rank_point_delta,
+        sum(rank_point_delta) over(partition by player_name order by match_date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as rank_point
+      from _rank_point_delta
+    )
+    where match_date = today_date
+  )
+
+  select 
+    player_name,
+    coalesce(match_date, today_date) as match_date,
+    coalesce(rank_point_delta, 0) as rank_point_delta,
+    coalesce(rank_point, 0) as rank_point,
+    rank
+  from `alt-tab-348721.alttab_22w.player_name_list`
+  left outer join _today_rank_table
+  using(player_name);
+
+  set i = i + 1;
+end while;
+
+
+
+
+

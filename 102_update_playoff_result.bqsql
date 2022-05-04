@@ -1,0 +1,28 @@
+declare today_date date default "2022-04-28";
+
+create or replace table `alt-tab-348721.alttab_22w.player_rank`
+partition by match_date 
+as 
+
+SELECT * FROM `alt-tab-348721.alttab_22w.player_rank` where match_date < today_date
+union all 
+select 
+  player_name,
+  match_date,
+  rank_point_delta,
+  rank_point,
+  case
+    when player_name = "곽대희" then 1
+    when player_name = "이인호" then 2
+    when player_name = "안치훈" then 3
+    when player_name = "이영준" then 4
+    when player_name = "우영준" then 5
+    when player_name = "정성운" then 6
+    when player_name = "최종욱" then 7
+    when player_name = "양성진" then 8
+    when player_name = "오상택" then 9
+    when player_name = "정선민" then 10
+    when player_name = "성석현" then 11
+    when player_name = "이성욱" then 12
+    end as rank
+from `alt-tab-348721.alttab_22w.player_rank` where match_date = today_date

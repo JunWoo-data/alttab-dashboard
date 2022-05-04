@@ -1,0 +1,127 @@
+create or replace table `alt-tab-348721.alttab_22w.standing_table` 
+partition by match_date
+as 
+
+with
+_rank_related_columns as (
+  select
+    player_name,
+    match_date,
+    rank() over(order by match_date DESC) as match_date_order,
+    rank_point_delta,
+    rank_point,
+    rank,
+    LAG(rank) OVER (PARTITION BY player_name  
+    		              ORDER BY match_date) - rank as rank_delta
+  FROM `alt-tab-348721.alttab_22w.player_rank` 
+),
+
+_win_lose_gain_loss_related_columns as (
+  select
+    player_name,
+    match_date,
+    sum(number_of_win) over (partition by player_name 
+                             order by match_date 
+                             ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as number_of_win,
+    sum(number_of_draw) over (partition by player_name 
+                              order by match_date
+                              ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as number_of_draw,
+    sum(number_of_lose) over (partition by player_name 
+                              order by match_date
+                              ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as number_of_lose,
+    sum(number_of_gain) over (partition by player_name 
+                              order by match_date
+                              ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as number_of_gain,
+    sum(number_of_loss) over (partition by player_name 
+                              order by match_date
+                              ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as number_of_loss
+  from (
+    select
+      player_name, match_date,
+      sum(case when match_result = 1 then 1 else 0 end) as number_of_win,
+      sum(case when match_result = 0 then 1 else 0 end) as number_of_draw,
+      sum(case when match_result = -1 then 1 else 0 end) as number_of_lose,
+      sum(gain) as number_of_gain,
+      sum(loss) as number_of_loss
+    FROM `alt-tab-348721.alttab_22w.player_name_list`
+    left outer join `alt-tab-348721.alttab_22w.match_result_flatten`
+    using(player_name)
+    group by player_name, match_date
+  )
+),
+
+_distinct_match_date as (
+select
+  player_name, match_date, match_order 
+from `alt-tab-348721.alttab_22w.player_name_list`
+cross join (select distinct match_date from  `alt-tab-348721.alttab_22w.match_result_flatten`)
+cross join (select 1 as match_order union all select 2 union all select 3)
+),
+
+_recent_3_week_results as (
+  select
+    * except(match_result, match_order)
+  from (
+    select
+      _distinct_match_date.*,
+      _result.match_result,
+      match_result as recent_1_result,
+      lag(match_result, 1) over(partition by player_name order by match_date, match_order) as recent_2_result,
+      lag(match_result, 2) over(partition by player_name order by match_date, match_order) as recent_3_result,
+      lag(match_result, 3) over(partition by player_name order by match_date, match_order) as recent_4_result,
+      lag(match_result, 4) over(partition by player_name order by match_date, match_order) as recent_5_result,
+      lag(match_result, 5) over(partition by player_name order by match_date, match_order) as recent_6_result,
+      lag(match_result, 6) over(partition by player_name order by match_date, match_order) as recent_7_result,
+      lag(match_result, 7) over(partition by player_name order by match_date, match_order) as recent_8_result,
+      lag(match_result, 8) over(partition by player_name order by match_date, match_order) as recent_9_result,
+    from _distinct_match_date
+    left outer join `alt-tab-348721.alttab_22w.match_result_flatten` as _result
+    using (player_name, match_date, match_order)
+  )
+  where match_order = 3
+)
+
+select  
+  player_name,
+  match_date,
+  match_date_order,
+  rank_point,
+  rank_point_delta,
+  rank,
+  coalesce(rank_delta, 0) as rank_delta,
+  concat(
+    coalesce(last_value(number_of_win ignore nulls) over(partition by player_name 
+                                                         order by match_date
+                                                         ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), 0),
+    "-",
+    coalesce(last_value(number_of_draw ignore nulls) over(partition by player_name 
+                                                          order by match_date
+                                                          ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), 0),
+    "-",
+    coalesce(last_value(number_of_lose ignore nulls) over(partition by player_name 
+                                                          order by match_date
+                                                          ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), 0)
+  ) as win_draw_lose,
+  concat(
+    coalesce(last_value(number_of_gain ignore nulls) over(partition by player_name 
+                                                          order by match_date
+                                                          ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), 0),
+    "-",
+    coalesce(last_value(number_of_loss ignore nulls) over(partition by player_name 
+                                                          order by match_date
+                                                          ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), 0)
+  ) as gain_loss,
+  recent_1_result,
+  recent_2_result,
+  recent_3_result,
+  recent_4_result,
+  recent_5_result,
+  recent_6_result,
+  recent_7_result,
+  recent_8_result,
+  recent_9_result
+from _rank_related_columns
+left outer join _win_lose_gain_loss_related_columns
+using(player_name, match_date)
+left outer join _recent_3_week_results
+using(player_name, match_date)

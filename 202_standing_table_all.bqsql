@@ -1,4 +1,4 @@
-create or replace table `alt-tab-348721.alttab_all.standing_table`
+create or replace table `alt-tab-348721.alttab_all.standing_table_all`
 partition by match_date
 as
 

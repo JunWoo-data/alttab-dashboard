@@ -2,7 +2,6 @@ create or replace table `alt-tab-348721.alttab_22w.match_result_duplicated`
 partition by match_date
 as 
 
--- case 1
 SELECT 
   season, event_name, match_date, is_single, 
   team_a_player_1, 
@@ -14,19 +13,6 @@ SELECT
 FROM `alt-tab-348721.alttab_22w.match_result_original`
 union all
 
--- case 3
-SELECT 
-  season, event_name, match_date, is_single,
-  team_a_player_2 as team_a_player_1, 
-  team_a_player_1 as team_a_player_2, 
-  team_a_score,
-  team_b_player_1,
-  team_b_player_2,
-  team_b_score
-FROM `alt-tab-348721.alttab_22w.match_result_original`
-union all
-
--- case 5
 SELECT 
   season, event_name, match_date, is_single,
   team_b_player_1 as team_a_player_1, 
@@ -36,15 +22,4 @@ SELECT
   team_a_player_2 as team_b_player_2,
   team_a_score as team_b_score
 FROM `alt-tab-348721.alttab_22w.match_result_original`
-union all
 
--- case 7 
-SELECT 
-  season, event_name, match_date, is_single,
-  team_b_player_2 as team_a_player_1, 
-  team_b_player_1 as team_a_player_2, 
-  team_b_score as team_a_score,
-  team_a_player_1 as team_b_player_1,
-  team_a_player_2 as team_b_player_2,
-  team_a_score as team_b_score
-FROM `alt-tab-348721.alttab_22w.match_result_original`

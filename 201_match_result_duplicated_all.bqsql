@@ -1,4 +1,4 @@
-create or replace table `alt-tab-348721.alttab_all.match_result_duplicated`
+create or replace table `alt-tab-348721.alttab_all.match_result_duplicated_all`
 partition by match_date
 as
 

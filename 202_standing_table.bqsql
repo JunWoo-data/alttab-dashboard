@@ -1,0 +1,7 @@
+create or replace table `alt-tab-348721.alttab_all.standing_table`
+partition by match_date
+as
+
+SELECT * FROM `alt-tab-348721.alttab_21f.standing_table` where match_date_order = 1
+union all 
+SELECT * FROM `alt-tab-348721.alttab_22w.standing_table` where match_date_order = 1

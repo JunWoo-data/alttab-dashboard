@@ -2,6 +2,6 @@ create or replace table `alt-tab-348721.alttab_all.standing_table_all`
 partition by match_date
 as
 
-SELECT * FROM `alt-tab-348721.alttab_21f.standing_table` where match_date_order = 1
+SELECT "2021F" as season, * FROM `alt-tab-348721.alttab_21f.standing_table` where match_date_order = 1
 union all 
-SELECT * FROM `alt-tab-348721.alttab_22w.standing_table` where match_date_order = 1
+SELECT "2022W", * FROM `alt-tab-348721.alttab_22w.standing_table` where match_date_order = 1

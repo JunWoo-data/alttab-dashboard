@@ -1,0 +1,50 @@
+create or replace table `alt-tab-348721.alttab_all.stat_partnership` as
+
+with
+_all_matches as (
+  SELECT 
+    team_a_player_1, team_a_player_2, 
+    case
+      when team_a_score > team_b_score then 1
+      when team_a_score = team_b_score then 0
+      when team_a_score < team_b_score then -1
+    end as result
+  FROM `alt-tab-348721.alttab_all.match_result_duplicated_all` 
+  where not is_single
+
+  union all
+
+  SELECT 
+    team_a_player_2, team_a_player_1, 
+    case
+      when team_a_score > team_b_score then 1
+      when team_a_score = team_b_score then 0
+      when team_a_score < team_b_score then -1
+    end as result
+  FROM `alt-tab-348721.alttab_all.match_result_duplicated_all` 
+  where not is_single
+),
+
+_win_percentage as (
+  select
+    *,
+    (win + draw + lose) as total_matches,
+    win / (win + draw + lose) as win_percentage 
+  from (
+    select 
+      team_a_player_1, team_a_player_2,
+      sum(case when result = 1 then 1 else 0 end) as win,
+      sum(case when result = 0 then 1 else 0 end) as draw,  
+      sum(case when result = -1 then 1 else 0 end) as lose,
+    from _all_matches
+    group by team_a_player_1, team_a_player_2
+  )
+)
+
+select
+  *,
+  rank() over(partition by team_a_player_1 order by win_percentage desc, total_matches desc) as best_team_player_rank,
+  rank() over(partition by team_a_player_1 order by win_percentage, total_matches desc) as worst_team_player_rank
+from _win_percentage
+where total_matches >= 3
+order by team_a_player_1, win_percentage desc, total_matches desc

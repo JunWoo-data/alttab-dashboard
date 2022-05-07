@@ -150,4 +150,3 @@ select
   gain_loss, recent_1_result, recent_2_result, recent_3_result, recent_4_result, recent_5_result, recent_6_result, recent_7_result, recent_8_result, recent_9_result
 
 from _joined
-order by player_name, match_date

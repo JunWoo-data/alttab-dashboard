@@ -1,4 +1,4 @@
-create or replace table `alt-tab-348721.alttab_all.stat_partnership` as
+create or replace table `alt-tab-348721.alttab_all.stat_partner` as
 
 with
 _all_matches as (

@@ -29,6 +29,18 @@ _win_lose_gain_loss_related_columns as (
     sum(number_of_lose) over (partition by player_name 
                               order by match_date
                               ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as number_of_lose,
+    sum(number_of_win) over (partition by player_name 
+                             order by match_date 
+                             ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) / 
+    (sum(number_of_win) over (partition by player_name 
+                     order by match_date 
+                     ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) +
+     sum(number_of_draw) over (partition by player_name 
+                               order by match_date
+                               ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) +
+     sum(number_of_lose) over (partition by player_name 
+                               order by match_date
+                               ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)) as win_percentage,          
     sum(number_of_gain) over (partition by player_name 
                               order by match_date
                               ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as number_of_gain,
@@ -79,49 +91,63 @@ _recent_3_week_results as (
     using (player_name, match_date, match_order)
   )
   where match_order = 3
+),
+
+_joined as (
+  select  
+    player_name,
+    match_date,
+    match_date_order,
+    rank_point,
+    rank_point_delta,
+    rank,
+    coalesce(rank_delta, 0) as rank_delta,
+    concat(
+      coalesce(last_value(number_of_win ignore nulls) over(partition by player_name 
+                                                           order by match_date
+                                                           ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), 0),
+      "-",
+      coalesce(last_value(number_of_draw ignore nulls) over(partition by player_name 
+                                                            order by match_date
+                                                            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), 0),
+      "-",
+      coalesce(last_value(number_of_lose ignore nulls) over(partition by player_name 
+                                                            order by match_date
+                                                            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), 0)
+    ) as win_draw_lose,
+    coalesce(win_percentage, last_value(win_percentage ignore nulls) over(partition by player_name 
+                                                                          order by match_date
+                                                                          ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)) as win_percentage,
+    concat(
+      coalesce(last_value(number_of_gain ignore nulls) over(partition by player_name 
+                                                            order by match_date
+                                                            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), 0),
+      "-",
+      coalesce(last_value(number_of_loss ignore nulls) over(partition by player_name 
+                                                            order by match_date
+                                                            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), 0)
+    ) as gain_loss,
+    recent_1_result,
+    recent_2_result,
+    recent_3_result,
+    recent_4_result,
+    recent_5_result,
+    recent_6_result,
+    recent_7_result,
+    recent_8_result,
+    recent_9_result
+  from _rank_related_columns
+  left outer join _win_lose_gain_loss_related_columns
+  using(player_name, match_date)
+  left outer join _recent_3_week_results
+  using(player_name, match_date)
 )
 
-select  
-  player_name,
-  match_date,
-  match_date_order,
-  rank_point,
-  rank_point_delta,
-  rank,
-  coalesce(rank_delta, 0) as rank_delta,
-  concat(
-    coalesce(last_value(number_of_win ignore nulls) over(partition by player_name 
-                                                         order by match_date
-                                                         ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), 0),
-    "-",
-    coalesce(last_value(number_of_draw ignore nulls) over(partition by player_name 
-                                                          order by match_date
-                                                          ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), 0),
-    "-",
-    coalesce(last_value(number_of_lose ignore nulls) over(partition by player_name 
-                                                          order by match_date
-                                                          ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), 0)
-  ) as win_draw_lose,
-  concat(
-    coalesce(last_value(number_of_gain ignore nulls) over(partition by player_name 
-                                                          order by match_date
-                                                          ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), 0),
-    "-",
-    coalesce(last_value(number_of_loss ignore nulls) over(partition by player_name 
-                                                          order by match_date
-                                                          ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), 0)
-  ) as gain_loss,
-  recent_1_result,
-  recent_2_result,
-  recent_3_result,
-  recent_4_result,
-  recent_5_result,
-  recent_6_result,
-  recent_7_result,
-  recent_8_result,
-  recent_9_result
-from _rank_related_columns
-left outer join _win_lose_gain_loss_related_columns
-using(player_name, match_date)
-left outer join _recent_3_week_results
-using(player_name, match_date)
+select
+  player_name, match_date, match_date_order, rank_point, rank_point_delta, rank, rank_delta, win_draw_lose, 
+  coalesce(win_percentage, 0) as win_percentage,
+  coalesce(win_percentage - coalesce(lag(win_percentage) over(partition by player_name order by match_date), 0), 0) as win_percentage_delta,
+  gain_loss, recent_1_result, recent_2_result, recent_3_result, recent_4_result, recent_5_result, recent_6_result, recent_7_result, recent_8_result, recent_9_result
+
+from _joined
+order by player_name, match_date

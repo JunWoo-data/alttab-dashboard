@@ -43,8 +43,8 @@ _win_percentage as (
 
 select
   *,
-  rank() over(partition by team_a_player_1 order by win_percentage desc, total_matches desc) as best_team_player_rank,
-  rank() over(partition by team_a_player_1 order by win_percentage, total_matches desc) as worst_team_player_rank
+  rank() over(partition by team_a_player_1 order by win_percentage desc, total_matches desc, lose) as best_rank,
+  rank() over(partition by team_a_player_1 order by win_percentage, total_matches desc, lose desc) as worst_rank
 from _win_percentage
 where total_matches >= 3
 order by team_a_player_1, win_percentage desc, total_matches desc

@@ -1,11 +1,11 @@
-create or replace table `alt-tab-348721.alttab_22w.player_rank`
+create or replace table `alt-tab-348721.alttab_22f.player_rank`
 partition by match_date 
 as 
 
 select
   player_name, 
-  DATE "2022-01-05" as match_date,
+  DATE "2022-09-07" as match_date,
   200 rank_point_delta,
   200 rank_point,
   6 as rank
-FROM `alt-tab-348721.alttab_22w.player_name_list`
+FROM `alt-tab-348721.alttab_22f.player_name_list`

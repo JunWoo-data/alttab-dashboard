@@ -1,10 +1,10 @@
-create or replace table `alt-tab-348721.alttab_22w.player_name_list` as
+create or replace table `alt-tab-348721.alttab_22f.player_name_list` as
 
 select "곽대희" as player_name
 union all
 select "안치훈"
 union all
-select "이영준"
+select "정광우"
 union all
 select "우영준"
 union all

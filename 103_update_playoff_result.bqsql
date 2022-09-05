@@ -1,10 +1,10 @@
 declare today_date date default "2022-04-28";
 
-create or replace table `alt-tab-348721.alttab_22w.player_rank`
+create or replace table `alt-tab-348721.alttab_22f.player_rank`
 partition by match_date 
 as 
 
-SELECT * FROM `alt-tab-348721.alttab_22w.player_rank` where match_date < today_date
+SELECT * FROM `alt-tab-348721.alttab_22f.player_rank` where match_date < today_date
 union all 
 select 
   player_name,
@@ -25,4 +25,4 @@ select
     when player_name = "성석현" then 11
     when player_name = "이성욱" then 12
     end as rank
-from `alt-tab-348721.alttab_22w.player_rank` where match_date = today_date
+from `alt-tab-348721.alttab_22f.player_rank` where match_date = today_date

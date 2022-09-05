@@ -4,4 +4,6 @@ as
 
 SELECT "2021F" as season, "이영준" as captain, * FROM `alt-tab-348721.alttab_21f.standing_table` 
 union all 
-SELECT "2022W", "이영준", * FROM `alt-tab-348721.alttab_22w.standing_table` 
+SELECT "2022W", "이영준", * FROM `alt-tab-348721.alttab_22w.standing_table`
+union all 
+SELECT "2022F", "우영준", * FROM `alt-tab-348721.alttab_22f.standing_table` 

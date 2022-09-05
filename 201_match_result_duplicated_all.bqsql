@@ -5,3 +5,5 @@ as
 SELECT * FROM `alt-tab-348721.alttab_21f.match_result_duplicated`
 union all 
 SELECT * FROM `alt-tab-348721.alttab_22w.match_result_duplicated`
+union all
+SELECT * FROM `alt-tab-348721.alttab_22f.match_result_duplicated`

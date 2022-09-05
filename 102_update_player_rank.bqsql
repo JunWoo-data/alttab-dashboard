@@ -3,7 +3,7 @@ declare today_date date;
 declare i int64 default 1;
 declare n int64;
 
-set last_date = (select max(match_date) from `alt-tab-348721.alttab_22w.player_rank`);
+set last_date = (select max(match_date) from `alt-tab-348721.alttab_22f.player_rank`);
 
 create temp table _match_date_list as (
   select
@@ -12,7 +12,7 @@ create temp table _match_date_list as (
   from (
     SELECT distinct
       match_date
-    FROM `alt-tab-348721.alttab_22w.match_result_flatten`
+    FROM `alt-tab-348721.alttab_22f.match_result_flatten`
     where match_date > last_date
   )
 );
@@ -26,8 +26,8 @@ set n = (
 while i <= n do
   set today_date = (select match_date from _match_date_list where match_date_order = i);
   
-  delete from `alt-tab-348721.alttab_22w.player_rank` where match_date = today_date;
-  INSERT into `alt-tab-348721.alttab_22w.player_rank`
+  delete from `alt-tab-348721.alttab_22f.player_rank` where match_date = today_date;
+  INSERT into `alt-tab-348721.alttab_22f.player_rank`
 
   with
   _today_result_flatten as (
@@ -36,18 +36,18 @@ while i <= n do
     coalesce(_result.match_date, today_date) as match_date,
     coalesce(game_difference_point, 0) as game_difference_point,
     coalesce(winning_point, 0) as winning_point,
-  from `alt-tab-348721.alttab_22w.player_name_list` as _name
+  from `alt-tab-348721.alttab_22f.player_name_list` as _name
   left outer join ( 
     select
       *
-    from `alt-tab-348721.alttab_22w.match_result_flatten` 
+    from `alt-tab-348721.alttab_22f.match_result_flatten` 
     where match_date = today_date
     ) as _result
   using (player_name)
   ),
 
   _rank_point_delta as (
-    select * from `alt-tab-348721.alttab_22w.player_rank` where match_date < today_date
+    select * from `alt-tab-348721.alttab_22f.player_rank` where match_date < today_date
     union all
     SELECT 
       player_name, match_date,
@@ -82,7 +82,7 @@ while i <= n do
     coalesce(rank_point_delta, 0) as rank_point_delta,
     coalesce(rank_point, 0) as rank_point,
     rank
-  from `alt-tab-348721.alttab_22w.player_name_list`
+  from `alt-tab-348721.alttab_22f.player_name_list`
   left outer join _today_rank_table
   using(player_name);
 

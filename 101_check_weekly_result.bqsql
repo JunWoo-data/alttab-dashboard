@@ -4,6 +4,6 @@ select
   player_name, match_date,
   sum(game_difference_point) as game_difference_point,
   sum(winning_point) as winning_point,
-from (SELECT * FROM `alt-tab-348721.alttab_21f.match_result_flatten` WHERE match_date = today_date)
+from (SELECT * FROM `alt-tab-348721.alttab_22f.match_result_flatten` WHERE match_date = today_date)
 group by player_name, match_date
 order by player_name

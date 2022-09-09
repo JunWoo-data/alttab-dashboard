@@ -2,8 +2,11 @@ create or replace table `alt-tab-348721.alttab_all.match_result_duplicated_all`
 partition by match_date
 as
 
-SELECT * FROM `alt-tab-348721.alttab_21f.match_result_duplicated`
-union all 
-SELECT * FROM `alt-tab-348721.alttab_22w.match_result_duplicated`
-union all
-SELECT * FROM `alt-tab-348721.alttab_22f.match_result_duplicated`
+select * from (
+    SELECT * FROM `alt-tab-348721.alttab_21f.match_result_duplicated`
+    union all 
+    SELECT * FROM `alt-tab-348721.alttab_22w.match_result_duplicated`
+    union all
+    SELECT * FROM `alt-tab-348721.alttab_22f.match_result_duplicated`
+)
+where season is not null

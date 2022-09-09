@@ -16,37 +16,36 @@ _rank_related_columns as (
   FROM `alt-tab-348721.alttab_22f.player_rank` 
 ),
 
-_win_lose_gain_loss_related_columns as (
+_win_lose_gain_loss_related_columns_temp as (
   select
-    player_name,
-    match_date,
+    player_name, match_date, number_of_win, number_of_draw, number_of_lose, 
     sum(number_of_win) over (partition by player_name 
                              order by match_date 
-                             ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as number_of_win,
+                             ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as number_of_win_cum,
     sum(number_of_draw) over (partition by player_name 
                               order by match_date
-                              ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as number_of_draw,
+                              ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as number_of_draw_cum,
     sum(number_of_lose) over (partition by player_name 
                               order by match_date
-                              ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as number_of_lose,
-    sum(number_of_win) over (partition by player_name 
-                             order by match_date 
-                             ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) / 
+                              ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as number_of_lose_cum,
     (sum(number_of_win) over (partition by player_name 
-                     order by match_date 
-                     ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) +
+                              order by match_date 
+                              ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) +
      sum(number_of_draw) over (partition by player_name 
                                order by match_date
                                ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) +
      sum(number_of_lose) over (partition by player_name 
                                order by match_date
-                               ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)) as win_percentage,          
+                               ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)) as number_of_matches_cum, 
+    
+    number_of_gain, number_of_loss,
     sum(number_of_gain) over (partition by player_name 
                               order by match_date
-                              ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as number_of_gain,
+                              ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as number_of_gain_cum,
     sum(number_of_loss) over (partition by player_name 
                               order by match_date
-                              ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as number_of_loss
+                              ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) as number_of_loss_cum
+
   from (
     select
       player_name, match_date,
@@ -60,6 +59,22 @@ _win_lose_gain_loss_related_columns as (
     using(player_name)
     group by player_name, match_date
   )
+),
+
+_win_lose_gain_loss_related_columns as (
+  select
+    player_name,
+    match_date,
+    number_of_win_cum as number_of_win,
+    number_of_draw_cum as number_of_draw,
+    number_of_lose_cum as number_of_lose,
+    case 
+      when number_of_matches_cum = 0 then 0
+      else  number_of_win_cum / number_of_matches_cum
+      end as win_percentage,
+    number_of_gain_cum as number_of_gain, 
+    number_of_loss_cum as number_of_loss
+  from _win_lose_gain_loss_related_columns_temp
 ),
 
 _distinct_match_date as (

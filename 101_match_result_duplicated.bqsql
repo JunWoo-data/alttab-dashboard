@@ -10,7 +10,8 @@ SELECT
   team_b_player_1,
   team_b_player_2,
   team_b_score,
-  video_link
+  video_link,
+  True as is_original
 FROM `alt-tab-348721.alttab_22f.match_result_original`
 union all
 
@@ -22,6 +23,7 @@ SELECT
   team_a_player_1 as team_b_player_1,
   team_a_player_2 as team_b_player_2,
   team_a_score as team_b_score,
-  video_link
+  video_link,
+  False as is_original
 FROM `alt-tab-348721.alttab_22f.match_result_original`
 

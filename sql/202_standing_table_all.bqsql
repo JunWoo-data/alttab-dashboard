@@ -1,9 +1,11 @@
-create or replace table `alt-tab-348721.alttab_all.standing_table_all`
-partition by match_date
-as
+-- create or replace table `alt-tab-348721.alttab_all.standing_table_all`
+-- partition by match_date
+-- as
 
 SELECT "2021F" as season, "이영준" as captain, * FROM `alt-tab-348721.alttab_21f.standing_table` 
 union all 
 SELECT "2022W", "이영준", * FROM `alt-tab-348721.alttab_22w.standing_table`
 union all 
 SELECT "2022F", "우영준", * FROM `alt-tab-348721.alttab_22f.standing_table` 
+union all
+SELECT "2023W", "우영준", * FROM `alt-tab-348721.alttab_23w.standing_table` 

@@ -1,7 +1,6 @@
-create or replace table `alt-tab-348721.alttab_22f.match_result_duplicated`
-partition by match_date
-as 
-
+-- create or replace table `alt-tab-348721.alttab_23w.match_result_duplicated`
+-- partition by match_date
+-- as 
 
 SELECT 
   season, event_name, match_date, court_number, match_order, is_single, 
@@ -13,7 +12,7 @@ SELECT
   team_b_score,
   video_link,
   True as is_original
-FROM `alt-tab-348721.alttab_22f.match_result_original`
+FROM `alt-tab-348721.{dataset_id}.match_result_original`
 where season is not null
 union all
 
@@ -27,6 +26,6 @@ SELECT
   team_a_score as team_b_score,
   video_link,
   False as is_original
-FROM `alt-tab-348721.alttab_22f.match_result_original`
+FROM `alt-tab-348721.{dataset_id}.match_result_original`
 where season is not null
 

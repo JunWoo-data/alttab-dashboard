@@ -1,0 +1,26 @@
+select
+  player_name, 
+  match_date, 
+  rank_point_delta, 
+  rank_point,
+  case when match_order = 1 then 6
+  else rank() over(partition by match_date 
+                   order by rank_point desc) 
+  end as rank
+from (
+  SELECT 
+    player_name,
+    match_date,
+    case
+      when match_date = '{match_date}' and player_name = '{player_name}' 
+      then  -5
+      else rank_point_delta end as rank_point_delta, 
+
+    case
+      when match_date = '{match_date}' and player_name = '{player_name}' 
+      then lag(rank_point) over (partition by player_name 
+                                 order by match_date) -5
+      else rank_point end as rank_point, 
+    rank() over(order by match_date) as match_order
+  FROM `alt-tab-348721.alttab_23w.player_rank` 
+)

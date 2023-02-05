@@ -1,12 +1,12 @@
-create or replace table `alt-tab-348721.alttab_22f.match_result_flatten`
-partition by match_date
-as 
+-- create or replace table `alt-tab-348721.alttab_23w.match_result_flatten`
+-- partition by match_date
+-- as 
 
 with
 _official_match_result as (
   select 
     * 
-  from `alt-tab-348721.alttab_22f.match_result_original` 
+  from `alt-tab-348721.{dataset_id}.match_result_original` 
   where is_official
 ),
 

@@ -1,8 +1,9 @@
-create or replace table `alt-tab-348721.alttab_all.stat_opponent` as
+-- create or replace table `alt-tab-348721.alttab_all.stat_opponent` as
 
 with
 _all_matches as (
   SELECT 
+    match_date,
     team_a_player_1 as player, team_b_player_1 as opponent, 
     case
       when team_a_score > team_b_score then 1
@@ -15,6 +16,7 @@ _all_matches as (
   union all
 
   SELECT 
+    match_date,
     team_a_player_1, team_b_player_2, 
     case
       when team_a_score > team_b_score then 1
@@ -26,6 +28,7 @@ _all_matches as (
 
   union all
   SELECT 
+    match_date,
     team_a_player_2, team_b_player_1, 
     case
       when team_a_score > team_b_score then 1
@@ -38,6 +41,7 @@ _all_matches as (
   union all
 
   SELECT 
+    match_date,
     team_a_player_2, team_b_player_2, 
     case
       when team_a_score > team_b_score then 1
@@ -56,18 +60,23 @@ _win_percentage as (
   from (
     select 
       player, opponent,
+      max(match_date) as match_date,
       sum(case when result = 1 then 1 else 0 end) as win,
       sum(case when result = 0 then 1 else 0 end) as draw,  
       sum(case when result = -1 then 1 else 0 end) as lose,
     from _all_matches
     group by player, opponent
   )
-)
+),
 
-select
-  *,
-  rank() over(partition by player order by win_percentage desc, total_matches desc, lose) as best_rank,
-  rank() over(partition by player order by win_percentage, total_matches desc, lose desc) as worst_rank
-from _win_percentage
-where total_matches >= 3
-order by player, win_percentage desc, total_matches desc
+_ordered_res as (
+  select
+    *,
+    rank() over(partition by player order by win_percentage desc, total_matches desc, lose) as best_rank,
+    rank() over(partition by player order by win_percentage, total_matches desc, lose desc) as worst_rank
+  from _win_percentage
+  where total_matches >= 3
+  order by player, win_percentage desc, total_matches desc
+) 
+
+select * from _ordered_res

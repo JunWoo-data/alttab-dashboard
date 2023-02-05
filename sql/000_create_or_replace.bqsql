@@ -1,0 +1,3 @@
+create or replace table `alt-tab-348721.{dataset_id}.{table_name}`
+partition by match_date
+as 

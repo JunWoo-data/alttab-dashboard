@@ -1,0 +1,84 @@
+create or replace table `alt-tab-348721.alttab_22f.player_rank`
+partition by match_date 
+as 
+
+select
+  player_name, 
+  DATE "2022-09-07" as match_date,
+  200 rank_point_delta,
+  200 rank_point,
+  6 as rank
+FROM `alt-tab-348721.alttab_22f.player_name_list`
+
+
+
+-- create or replace table `alt-tab-348721.alttab_22f.player_rank`
+-- partition by match_date 
+-- as 
+
+-- select
+--   player_name, 
+--   DATE "2022-09-07" as match_date,
+--   200 rank_point_delta,
+--   200 rank_point,
+--   6 as rank
+-- FROM `alt-tab-348721.alttab_22f.player_name_list`
+-- union all
+-- select 
+--   player_name,
+--   DATE "2022-09-08" as match_date,
+
+--   case
+--     when player_name = "곽대희" then 11
+--     when player_name = "우영준" then 10
+--     when player_name = "안치훈" then 9
+--     when player_name = "이인호" then 8
+
+--     when player_name = "양성진" then 7
+--     when player_name = "최종욱" then 6
+--     when player_name = "정성운" then 5
+--     when player_name = "정선민" then 4
+
+--     when player_name = "성석현" then 3
+--     when player_name = "이성욱" then 2
+--     when player_name = "오상택" then 1
+--     when player_name = "정광우" then 0
+--     when player_name = "안응진" then 0
+--     end as rank_point_delta,
+
+--   case
+--     when player_name = "곽대희" then 211
+--     when player_name = "우영준" then 210
+--     when player_name = "안치훈" then 209
+--     when player_name = "이인호" then 208
+
+--     when player_name = "양성진" then 207
+--     when player_name = "최종욱" then 206
+--     when player_name = "정성운" then 205
+--     when player_name = "정선민" then 204
+
+--     when player_name = "성석현" then 203
+--     when player_name = "이성욱" then 202
+--     when player_name = "오상택" then 201
+--     when player_name = "정광우" then 200
+--     when player_name = "안응진" then 200
+--     end as rank_point,
+
+--   case
+--     when player_name = "곽대희" then 1
+--     when player_name = "우영준" then 2
+--     when player_name = "안치훈" then 3
+--     when player_name = "이인호" then 4
+
+--     when player_name = "양성진" then 5
+--     when player_name = "최종욱" then 6
+--     when player_name = "정성운" then 7
+--     when player_name = "정선민" then 8
+
+--     when player_name = "성석현" then 9
+--     when player_name = "이성욱" then 10
+--     when player_name = "오상택" then 11
+--     when player_name = "정광우" then 12
+--     when player_name = "안응진" then 12
+--     end as rank
+-- from  `alt-tab-348721.alttab_22f.player_name_list`
